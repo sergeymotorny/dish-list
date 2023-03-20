@@ -1,0 +1,9 @@
+tr.liquid {
+    background-color:lightcyan;
+}
+tr.gram {
+    background-color:blanchedalmond;
+}
+tr.liquid, tr.gram {
+    text-align: center;
+}

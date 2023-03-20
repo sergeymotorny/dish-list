@@ -1,0 +1,15 @@
+body {
+    background-color: lightblue;
+}
+form {
+    text-align: center;
+}
+input {
+    font-size: 17px;
+    height: 40px;
+    width: 250px;
+    border-radius: 5px;
+}
+input[type='submit'] {
+    width: 150px;
+}
