@@ -1,15 +1,20 @@
 <?php
-if ($_POST) {
-    #number last product
-    $productTpl = '/^compoud-\d\d.txt\z/';
-    $path = __DIR__ . "/../data/" . $_GET['dish'];
-    $conts = scandir($path);
-    // $i = 0;
-    foreach ($conts as $node) {
-        if (preg_match($productTpl, $node)) {
-            $last_file = $node;
-        }
+    include(__DIR__ . '/../auth/check-auth.php');
+    if (!checkRight('dish', 'create')) {
+        die('Ви не маєте права на виконання цієї операції!');
     }
+
+    if ($_POST) {
+        #number last product
+        $productTpl = '/^compoud-\d\d.txt\z/';
+        $path = __DIR__ . "/../data/" . $_GET['dish'];
+        $conts = scandir($path);
+        // $i = 0;
+        foreach ($conts as $node) {
+            if (preg_match($productTpl, $node)) {
+                $last_file = $node;
+            }
+        }
 
     #index last file, +1
     $file_index = (string)((int)substr($last_file, -6, 2) + 1);

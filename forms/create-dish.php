@@ -1,4 +1,9 @@
 <?php
+    include(__DIR__ . '/../auth/check-auth.php');
+    if (!checkRight('dish', 'create')) {
+        die('Ви не маєте права на виконання цієї операції!');
+    }
+
     #number last dish
     $dishTpl = '/^dish-\d\d\z/';
     $path = __DIR__ . "/../data/";

@@ -1,4 +1,9 @@
 <?php 
+    include(__DIR__ . '/../auth/check-auth.php');
+    if (!checkRight('dish', 'edit')) {
+        die('Ви не маєте права на виконання цієї операції!');
+    }
+
     if ($_POST) {
         $f = fopen("../data/" . $_GET['dish'] . "/dish.txt", "w");
         $grArr = array(

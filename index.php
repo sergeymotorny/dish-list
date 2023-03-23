@@ -13,13 +13,16 @@
     <link rel="stylesheet" type="text/css" href="css/main-style.css">
     <link rel="stylesheet" href="css/liquid-style.css">
     <link rel="stylesheet" href="css/dish-choose-style.css">
-    <title>Страва</title>
+    <title>DISH-LIST</title>
 </head>
 
 <body>
     <header>
         <div class="user-info">
             <span>Hello <?php echo $_SESSION['user']; ?>!</span>
+            <?php if(checkRight('user', 'admin')): ?>
+                <a href="admin/index.php">Адміністрування</a>
+            <?php endif; ?>
             <a href="auth/logout.php">Logout</a>
         </div>
         <?php if (checkRight('dish', 'view')) : ?>

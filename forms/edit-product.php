@@ -1,4 +1,9 @@
 <?php
+    include(__DIR__ . '/../auth/check-auth.php');
+    if (!checkRight('dish', 'edit')) {
+        die('Ви не маєте права на виконання цієї операції!');
+    }
+
     if ($_POST) {
         $f = fopen("../data/" . $_GET['dish'] . "/" . $_GET['file'], "w");
         
@@ -54,7 +59,7 @@
         <br>  
         <div class="btn-group">
             <input class="button" type="submit" name="ok" value="Змінити"> 
-            <input class="button" type="submit" formaction="../index.php/" name="ok" value="На головну"> 
+            <input class="button" type="submit" formaction="../index.php" name="ok" value="На головну"> 
         </div>
     </form>
 </body>
