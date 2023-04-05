@@ -8,6 +8,10 @@ abstract class Data {
     private $error;
     private $user;
 
+    public function getCurrentUser() {
+        return $this -> user;
+    }
+
     public function setCurrentUser($userName) {
         $this -> user = $this -> readUser($userName);
     }

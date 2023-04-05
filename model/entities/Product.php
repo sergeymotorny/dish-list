@@ -1,11 +1,9 @@
 <?php 
-
 namespace Model;
 
 class Product {
     const LIQUID = 0;
     const GRAM = 1;
-
 
     private $id;
     private $product;
