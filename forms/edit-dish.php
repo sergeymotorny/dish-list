@@ -1,22 +1,26 @@
 <?php 
     include(__DIR__ . '/../auth/check-auth.php');
-    if (!checkRight('dish', 'edit')) {
-        die('Ви не маєте права на виконання цієї операції!');
-    }
+    
+    require_once '../model/autorun.php';
+    $myModel = Model\Data::makeModel(Model\Data::FILE);
+    $myModel -> setCurrentUser($_SESSION['user']);
 
     if ($_POST) {
-        $f = fopen("../data/" . $_GET['dish'] . "/dish.txt", "w");
-        $grArr = array(
-                $_POST['nameOfTheDish'], 
-                $_POST['type'], 
-                $_POST['portionWeight'],);
-        $grStr = implode(";", $grArr);
-        fwrite($f, $grStr);
-        fclose($f);
-        header('Location: ../index.php?dish=' . $_GET['dish']);
+        if(!$myModel -> writeDish((new \Model\Dish())
+            -> setId($_GET['dish'])
+            -> setNameOfTheDish($_POST['nameOfTheDish'])
+            -> setType($_POST['type'])
+            -> setPortionWeight($_POST['portionWeight'])
+        )) {
+            die($myModel -> getError());
+        } else {
+            header('Location: ../index.php?dish=' . $_GET['dish']);
+        } 
+        
     }
-    $dishFolder = $_GET['dish'];
-    require('../data/declare-dish.php');
+    if(!$data['dish'] = $myModel -> readDish($_GET['dish']) ) {
+        die($myModel -> getError());
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,18 +32,22 @@
     <title>Редагування інформації</title>
 </head>
 <body>
+    <a href="../index.php?dish=<?php echo $_GET['dish']; ?>"> На головну</a>
     <form name='edit-dish' method="post">
         <div>
             <label for="nameOfTheDish">Назва страви: </label>
-            <input type="text" name="nameOfTheDish" pattern="^[а-яА-ЯіІїЇєЄёЁa-zA-Z]+([\s-][а-яА-ЯіІїЇєЄёЁa-zA-Z]+)*$" value="<?php echo $data['dish']['nameOfTheDish']; ?>" required>
+            <input type="text" name="nameOfTheDish" pattern="^[а-яА-ЯіІїЇєЄёЁa-zA-Z]+([\s-][а-яА-ЯіІїЇєЄёЁa-zA-Z]+)*$" 
+                    value="<?php echo $data['dish'] -> getNameOfTheDish(); ?>" required>
         </div>
         <div>
             <label for="type">Тип: </label>
-            <input type="text" name="type" pattern="^[а-яА-ЯіІїЇєЄёЁa-zA-Z]+([\s-][а-яА-ЯіІїЇєЄёЁa-zA-Z]+)*$" value="<?php echo $data['dish']['type']; ?>" required>
+            <input type="text" name="type" pattern="^[а-яА-ЯіІїЇєЄёЁa-zA-Z]+([\s-][а-яА-ЯіІїЇєЄёЁa-zA-Z]+)*$" 
+                    value="<?php echo $data['dish'] -> getType(); ?>" required>
         </div>
         <div>
             <label for="portionWeight">Вага порції: </label>
-            <input type="text" name="portionWeight" placeholder="Example 850" pattern="[0-9]{1,4}" value="<?php echo $data['dish']['portionWeight']; ?>" required>
+            <input type="text" name="portionWeight" placeholder="Example 850" pattern="[0-9]{1,4}" 
+                    value="<?php echo $data['dish'] -> getPortionWeight(); ?>" required>
         </div>
         <br>
         <div class="btn-group">

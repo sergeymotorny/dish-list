@@ -1,15 +1,13 @@
 <?php
     include(__DIR__ . '/../auth/check-auth.php');
-    if (!checkRight('dish', 'delete')) {
-        die('Ви не маєте права на виконання цієї операції!');
-    }
+    
+    require_once '../model/autorun.php';
+    $myModel = Model\Data::makeModel(Model\Data::FILE);
+    $myModel -> setCurrentUser($_SESSION['user']);
 
-    $dirName = "../data/" . $_GET['dish'];
-    $const = scandir($dirName);
-    $i = 0;
-    foreach($const as $node) {
-        @unlink($dirName . "/" . $node);
+    if(!$myModel -> removeDish($_GET['dish'])) {
+        die($myModel -> getError());
+    } else {
+        header('Location: ../index.php');
     }
-    @rmdir($dirName);
-    header('Location: ../index.php')
 ?>

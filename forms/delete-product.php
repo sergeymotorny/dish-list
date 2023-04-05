@@ -1,9 +1,14 @@
 <?php 
     include(__DIR__ . '/../auth/check-auth.php');
-    if (!checkRight('dish', 'delete')) {
-        die('Ви не маєте права на виконання цієї операції!');
-    }
+    
+    require_once '../model/autorun.php';
+    $myModel = Model\Data::makeModel(Model\Data::FILE);
+    $myModel -> setCurrentUser($_SESSION['user']);
 
-    unlink(__DIR__ . "/../data/" . $_GET['dish'] . "/" . $_GET['file']);
-    header('Location: ../index.php?dish=' . $_GET['dish']);
+    $product = (new \Model\Product()) -> setId($_GET['file']) -> setDishId($_GET['dish']);
+    if(!$myModel -> removeProduct($product)) {
+        die($myModel -> getError());
+    } else {
+        header('Location: ../index.php?dish=' . $_GET['dish']);
+    }
 ?>

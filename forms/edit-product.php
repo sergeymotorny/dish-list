@@ -1,25 +1,30 @@
 <?php
     include(__DIR__ . '/../auth/check-auth.php');
-    if (!checkRight('dish', 'edit')) {
-        die('Ви не маєте права на виконання цієї операції!');
-    }
+
+    require_once '../model/autorun.php';
+    $myModel = Model\Data::makeModel(Model\Data::FILE);
+    $myModel -> setCurrentUser($_SESSION['user']);
 
     if ($_POST) {
-        $f = fopen("../data/" . $_GET['dish'] . "/" . $_GET['file'], "w");
-        
-        $grArr = array(
-            $_POST['products_name'], 
-            $_POST['products_weight'], 
-            $_POST['products_calories'],
-            $_POST['products_mass'],);
-        $grArr = implode(";", $grArr);
-        fwrite($f, $grArr);
-        fclose($f);
-        header('Location: ../index.php?dish=' . $_GET['dish']);
+        $product = (new \Model\Product())
+            -> setId($_GET['file'])
+            -> setDishId($_GET['dish'])
+            -> setProduct($_POST['products_name'])
+            -> setWeight($_POST['products_weight'])
+            -> setCalories($_POST['products_calories'])
+            -> setLiquidVolumeWeight();
+        if($_POST['products_mass'] == 'мл') {
+            $product -> setGramVolumeWeight();
+        }
+        if(!$myModel -> writeProduct($product)) {
+            die($myModel -> getError());
+        } else {
+            header('Location: ../index.php?dish=' . $_GET['dish']); 
+            // Выше можно заменить в ссылке на product= и ['product'], в случае ошибок.
+        }
     }
-    $path = __DIR__ . "/../data/" . $_GET['dish'];
-    $node = $_GET['file'];
-    $compoud = require __DIR__ . '/../data/declare-compoud.php';
+
+    $product = $myModel -> readProduct($_GET['dish'], $_GET['file']); 
 ?>
 
 <!DOCTYPE html>
@@ -33,27 +38,30 @@
 </head>
 <body>
     <?php
-    //var_dump($compoud['product']);
+    // var_dump($product['product']);
     ?>
     <form name="edit-product" method="post">
         <div>
             <label class="text-field__label" for="products_name">Продукт: </label>
-            <input class="text-field__input" type="text" name="products_name" pattern="^[а-яА-ЯіІїЇєЄёЁa-zA-Z]+([\s-][а-яА-ЯіІїЇєЄёЁa-zA-Z]+)*$" value="<?php echo $compoud['product'] ?>" required>
+            <input class="text-field__input" type="text" name="products_name" pattern="^[а-яА-ЯіІїЇєЄёЁa-zA-Z]+([\s-][а-яА-ЯіІїЇєЄёЁa-zA-Z]+)*$" 
+                    value="<?php echo $product -> getProduct(); ?>" required>
         </div>
         <div>
             <label class="text-field__label" for="products_weight">Вага: </label> 
             <!-- required pattern="\d+" -->
-            <input class="text-field__input" type="text" name="products_weight" pattern="[0-9]{1,4}" value="<?php echo $compoud['weight'] ?>" required>
+            <input class="text-field__input" type="text" name="products_weight" pattern="[0-9]{1,4}" 
+                    value="<?php echo $product -> getWeight(); ?>" required>
         </div>
         <div>
             <label class="text-field__label" for="products_calories">Калорій: </label>
-            <input class="text-field__input" type="text" name="products_calories" pattern="[0-9]{1,5}" value="<?php echo $compoud['calories'] ?>" required>
+            <input class="text-field__input" type="text" name="products_calories" pattern="[0-9]{1,5}" 
+                    value="<?php echo $product -> getCalories(); ?>" required>
         </div>
         <div>
             <label class="text-field__label" for="products_mass">Об'єм/Маса: </label>
             <select name="products_mass">
-                <option <?php echo ("грам" == $compoud['volumeWeight'])?"selected":""; ?> value="грам">грам</option>
-                <option <?php echo ("мл" == $compoud['volumeWeight'])?"selected":""; ?> value="мл">мл</option>
+                <option <?php echo ($product -> isVolumeWeightGram())?"selected":""; ?> value="грам">грам</option>
+                <option <?php echo ($product -> isVolumeWeightLiquid())?"selected":""; ?> value="мл">мл</option>
             </select>
         </div>
         <br>  

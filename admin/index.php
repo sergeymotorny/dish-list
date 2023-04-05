@@ -1,9 +1,12 @@
-<?php 
+<?php
     require '../auth/check-auth.php';
-    if (!checkRight('user', 'admin')) {
-        die('Ви не маєте права на виконання цієї операції!');
+
+    require_once '../model/autorun.php';
+    $myModel = Model\Data::makeModel(Model\Data::FILE);
+    $myModel -> setCurrentUser($_SESSION['user']);
+    if(!$data['users'] = $myModel -> readUsers()) {
+        die($myModel -> getError());
     }
-    require('../data/declare-users.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,9 +31,10 @@
             </thead>
             <tbody>
                 <?php foreach($data['users'] as $user):?>
-                    <?php if($user['name'] !=$_SESSION['user'] && $user['name'] != 'admin' && trim($user['name']) != ''): ?>
+                    <?php if($user ->getUserName() !=$_SESSION['user'] && $user -> getUserName() 
+                        != 'admin' && trim($user -> getUserName()) != ''): ?>
                     <tr>
-                        <td><a href="edit-user.php?username=<?php echo $user['name']; ?>"><?php echo $user['name']; ?></a></td>
+                        <td><a href="edit-user.php?username=<?php echo $user -> getUserName(); ?>"><?php echo $user -> getUserName(); ?></a></td>
                     </tr>
                     <?php endif; ?>
                 <?php endforeach; ?>

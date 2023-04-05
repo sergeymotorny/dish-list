@@ -1,6 +1,9 @@
 <?php
     require('auth/check-auth.php');
-    require('data/declare-dishs.php')
+
+    require_once 'model/autorun.php';
+    $myModel = Model\Data::makeModel(Model\Data::FILE);
+    $myModel -> setCurrentUser($_SESSION['user']);
 ?>
 
 <!DOCTYPE html>
@@ -20,51 +23,53 @@
     <header>
         <div class="user-info">
             <span>Hello <?php echo $_SESSION['user']; ?>!</span>
-            <?php if(checkRight('user', 'admin')): ?>
+            <?php if ($myModel->checkRight('user', 'admin')) : ?>
                 <a href="admin/index.php">Адміністрування</a>
             <?php endif; ?>
             <a href="auth/logout.php">Logout</a>
         </div>
-        <?php if (checkRight('dish', 'view')) : ?>
+        <?php if ($myModel->checkRight('dish', 'view')) : ?>
+            <?php $data['dishs'] = $myModel->readDishs(); ?>
             <form name="dish-form" method="get">
                 <label for="dish">Dish</label>
                 <select name="dish">
                     <option value=""></option>
                     <?php
                     foreach ($data['dishs'] as $listOfDishes) {
-                        echo "<option " . (($listOfDishes['file'] == $_GET['dish']) ? "selected" : "") .
-                            " value='" . $listOfDishes['file'] . "'>" . $listOfDishes['nameOfTheDish'] . "</option>";
+                        echo "<option " . (($listOfDishes->getId() == $_GET['dish']) ? "selected" : "") .
+                            " value='" . $listOfDishes->getId() . "'>" . $listOfDishes->getNameOfTheDish() . "</option>";
                     }
                     ?>
                 </select>
                 <input type="submit" value="ok">
-                <?php if (checkRight('dish', 'create')) : ?>
-                        <a href="forms/create-dish.php">Add dish</a>
+                <?php if ($myModel->checkRight('dish', 'create')) : ?>
+                    <a href="forms/create-dish.php">Add dish</a>
                 <?php endif; ?>
             </form>
             <?php if ($_GET['dish']) : ?>
                 <?php
                 $dishFolder = $_GET['dish'];
-                require('data/declare-data.php');
+                $data['dish'] = $myModel->readDish($_GET['dish']);
                 ?>
-                <h3>Назва: <span class="nameOfTheDish"><?php echo $data['dish']['nameOfTheDish'] ?></span></h3>
-                <h3>Тип: <span class="type"><?php echo $data['dish']['type'] ?></span></h3>
-                <h3>Вага порції: <span class="portionWeight"><?php echo $data['dish']['portionWeight'] ?></span></h3>
+                <h3>Назва: <span class="nameOfTheDish"><?php echo $data['dish']->getNameOfTheDish(); ?></span></h3>
+                <h3>Тип: <span class="type"><?php echo $data['dish']->getType(); ?></span></h3>
+                <h3>Вага порції: <span class="portionWeight"><?php echo $data['dish']->getPortionWeight(); ?></span></h3>
                 <div class="control">
-                    <?php if (checkRight('dish', 'edit')) : ?>
+                    <?php if ($myModel->checkRight('dish', 'edit')) : ?>
                         <a href="forms/edit-dish.php?dish=<?php echo $_GET['dish']; ?>">Edit dish</a>
                     <?php endif; ?>
-                    <?php if (checkRight('dish', 'delete')) : ?>
+                    <?php if ($myModel->checkRight('dish', 'delete')) : ?>
                         <a href="forms/delete-dish.php?dish=<?php echo $_GET['dish']; ?>">Delete dish</a>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
         <?php endif; ?>
     </header>
-    <?php if (checkRight('product', 'view')) : ?>
+    <?php if ($myModel->checkRight('product', 'view')) : ?>
+        <?php $data['products'] = $myModel->readProducts($_GET['dish']); ?>
         <section>
             <?php if ($_GET['dish']) : ?>
-                <?php if (checkRight('product', 'create')) : ?>
+                <?php if ($myModel->checkRight('product', 'create')) : ?>
                     <div class="control">
                         <a href="forms/create-product.php?dish=<?php echo $_GET['dish']; ?>">Додати продукт</a>
                     </div>
@@ -81,29 +86,35 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (!empty($data['compouds'])) : ?>
-                            <?php foreach ($data['compouds'] as $key => $compoud) : ?>
+
+                        <!-- Убрал ниже count! Т.к. ошибка -->
+                        <?php if (count($data['products']) > 0) : ?>
+                            <?php foreach ($data['products'] as $key => $product) : ?>
                                 <?php
                                 $row_class = 'row';
-                                if ($compoud['volumeWeight'] == 'мл') $row_class = 'liquid';
-                                if ($compoud['volumeWeight'] == 'грам') $row_class = 'gram';
+                                if ($product -> isVolumeWeightLiquid()) {
+                                    $row_class = 'liquid';
+                                }
+                                if ($product -> isVolumeWeightGram()) {
+                                    $row_class = 'gram';
+                                }
                                 ?>
-                                <?php if (!$_POST['compoudProdFilter'] || mb_stripos($compoud['product'], 
-                                            $_POST['compoudProdFilter'], 0, 'UTF-8' ) !== false) : ?>
+                                <?php if (!$_POST['productProdFilter'] || mb_stripos(
+                                    $product -> getNameOfTheProduct(), $_POST['productProdFilter'], 0, 'UTF-8') !== false) : ?>
                                     <tr class="<?php echo $row_class; ?>">
                                         <td><?php echo ($key + 1); ?></td>
-                                        <td><?php echo $compoud['product']; ?></td>
-                                        <td><?php echo $compoud['weight']; ?></td>
-                                        <td><?php echo $compoud['calories']; ?></td>
-                                        <td><?php echo $compoud['volumeWeight']; ?></td>
+                                        <td><?php echo $product-> getProduct(); ?></td>
+                                        <td><?php echo $product-> getWeight(); ?></td>
+                                        <td><?php echo $product-> getCalories(); ?></td>
+                                        <td><?php echo $product-> isVolumeWeightLiquid() ? 'мл' : 'грам'; ?></td>
                                         <td>
-                                            <?php if (checkRight('product', 'edit')) : ?>
+                                            <?php if ($myModel->checkRight('product', 'edit')) : ?>
                                                 <a href='forms/edit-product.php?dish=<?php echo $_GET['dish']; ?>&file=<?php echo
-                                                    $compoud['file']; ?>'>Редагувати</a>
+                                                        $product->getId(); ?>'>Редагувати</a>
                                             <?php endif; ?>
-                                            <?php if (checkRight('product', 'delete')) : ?>
+                                            <?php if ($myModel->checkRight('product', 'delete')) : ?>
                                                 <a href='forms/delete-product.php?dish=<?php echo $_GET['dish']; ?>&file=<?php echo
-                                                    $compoud['file']; ?>'>Видалити</a>
+                                                         $product->getId(); ?>'>Видалити</a>
                                             <?php endif; ?>
                                         </td>
                                         <!-- Переделать в еще один <td></td> -->
@@ -114,9 +125,9 @@
                     </tbody>
                 </table>
             <?php endif; ?>
-            <form name="compoud-filter" method="post">
+            <form name="product-filter" method="post">
                 <div class="btn-group">
-                    <input type="text" name="compoudProdFilter" value="<?php echo $_POST['compoudProdFilter'] ?>">
+                    <input type="text" name="productProdFilter" value="<?php echo $_POST['productProdFilter'] ?>">
                     Фільтрування по назві продукту <br>
                     <input type="submit" value="Фільтрування" class="button">
                 </div>

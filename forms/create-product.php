@@ -1,42 +1,27 @@
 <?php
     include(__DIR__ . '/../auth/check-auth.php');
-    if (!checkRight('dish', 'create')) {
-        die('Ви не маєте права на виконання цієї операції!');
-    }
 
     if ($_POST) {
-        #number last product
-        $productTpl = '/^compoud-\d\d.txt\z/';
-        $path = __DIR__ . "/../data/" . $_GET['dish'];
-        $conts = scandir($path);
-        // $i = 0;
-        foreach ($conts as $node) {
-            if (preg_match($productTpl, $node)) {
-                $last_file = $node;
-            }
+        require_once '../model/autorun.php';
+        $myModel = Model\Data::makeModel(Model\Data::FILE);
+        $myModel -> setCurrentUser($_SESSION['user']);
+
+        $product = (new \Model\Product())
+            -> setDishId($_GET['dish'])
+            -> setProduct($_POST['products_name'])
+            -> setWeight($_POST['products_weight'])
+            -> setCalories($_POST['products_calories'])
+            -> setLiquidVolumeWeight();
+        if($_POST['products_mass'] == 'мл') {
+            $product -> setGramVolumeWeight();
         }
-
-    #index last file, +1
-    $file_index = (string)((int)substr($last_file, -6, 2) + 1);
-    if (strlen($file_index) == 1) {
-        $file_index = "0" . $file_index;
+        if(!$myModel -> addProduct($product)) {
+            die($myModel -> getError());
+        } else {
+            header('Location: ../index.php?dish=' . $_GET['dish']); 
+            // Выше можно заменить в ссылке на product= и ['product'], в случае ошибок.
+        }
     }
-    #new file
-    $newFileName = "compoud-" . $file_index . ".txt";
-
-    #save data to file
-    $f = fopen("../data/" . $_GET['dish'] . "/" . $newFileName, "w");
-    $grArr = array(
-        $_POST['products_name'],
-        $_POST['products_weight'],
-        $_POST['products_calories'],
-        $_POST['products_mass'],
-    );
-    $grStr = implode(";", $grArr);
-    fwrite($f, $grStr);
-    fclose($f);
-    header('Location: ../index.php?dish=' . $_GET['dish']);
-}
 ?>
 
 <!DOCTYPE html>

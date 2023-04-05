@@ -20,7 +20,7 @@ span.portionWeight {
   /* font-size: 20px; */
   color: darkslategray;
 }
-form[name="compoud-filter"] {
+form[name="product-filter"] {
   margin: 12px 0px 7px 0px;
   text-align: left;
   margin-left: 15%;
