@@ -1,4 +1,4 @@
 admin;admin;111111111
-reader;reader;100010000
+reader;reader;100010110
 editor;editor;111010100
 creator;creator;111111110

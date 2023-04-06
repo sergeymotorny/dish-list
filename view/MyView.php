@@ -316,7 +316,7 @@ class MyView extends DishListView {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($users['users'] as $user):?>
+                        <?php foreach($users as $user):?>
                             <?php if($user ->getUserName() !=$_SESSION['user'] && $user -> getUserName() 
                                 != 'admin' && trim($user -> getUserName()) != ''): ?>
                             <tr>
