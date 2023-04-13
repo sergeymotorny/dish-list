@@ -5,7 +5,6 @@ namespace Model;
 class FileData extends Data {
     const DATA_PATH = __DIR__ . '/../data/';
     const PRODUCT_FILE_TEMPLATE = '/^product-\d\d.txt\z/';
-    // const PRODUCT_FILE_TEMPLATE = '/^compoud-\d\d.txt\z/';
     const DISH_FILE_TEMPLATE = '/^dish-\d\d\z/';
 
     protected function getProducts($dishId) {

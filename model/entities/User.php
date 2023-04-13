@@ -17,7 +17,7 @@ class User {
     }
 
     public function getPassword() {
-        return $this -> username;
+        return $this -> password;
     }
     public function setPassword($password) {
         $this -> password = $password;
