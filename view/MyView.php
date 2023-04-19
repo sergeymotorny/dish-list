@@ -18,7 +18,7 @@ class MyView extends DishListView {
             </select>
             <input type="submit" value="ok">
             <?php if ($this -> checkRight('dish', 'create')) : ?>
-                <a href="forms/create-dish.php">Додати блюдо</a>
+                <a href="?action=create-dish">Додати блюдо</a>
             <?php endif; ?>
         </form>
         <?php
@@ -30,10 +30,10 @@ class MyView extends DishListView {
         <h3>Вага порції: <span class="portionWeight"><?php echo $dish ->getPortionWeight(); ?></span></h3>
         <div class="control">
             <?php if ($this -> checkRight('dish', 'edit')) : ?>
-                <a href="forms/edit-dish.php?dish=<?php echo $_GET['dish']; ?>">Edit dish</a>
+                <a href="?action=edit-dish-form&dish=<?php echo $_GET['dish']; ?>">Edit dish</a>
             <?php endif; ?>
             <?php if ($this -> checkRight('dish', 'delete')) : ?>
-                <a href="forms/delete-dish.php?dish=<?php echo $_GET['dish']; ?>">Delete dish</a>
+                <a href="?action=delete-dish&dish=<?php echo $_GET['dish']; ?>">Delete dish</a>
              <?php endif; ?>
         </div>
         <?php
@@ -44,7 +44,7 @@ class MyView extends DishListView {
             <?php if ($_GET['dish']) : ?>
                 <?php if ($this -> checkRight('product', 'create')) : ?>
                     <div class="control">
-                        <a href="forms/create-product.php?dish=<?php echo $_GET['dish']; ?>">Додати продукт</a>
+                        <a href="?action=create-product-form&dish=<?php echo $_GET['dish']; ?>">Додати продукт</a>
                     </div>
                 <?php endif; ?>
                 <table>
@@ -71,7 +71,7 @@ class MyView extends DishListView {
                                 }
                                 ?>
                                 <?php if (!$_POST['productProdFilter'] || mb_stripos(
-                                    $product -> getNameOfTheProduct(), $_POST['productProdFilter'], 0, 'UTF-8') !== false) : ?>
+                                    $product -> getProduct(), $_POST['productProdFilter'], 0, 'UTF-8') !== false) : ?>
                                     <tr class="<?php echo $row_class; ?>">
                                         <td><?php echo ($key + 1); ?></td>
                                         <td><?php echo $product-> getProduct(); ?></td>
@@ -80,12 +80,12 @@ class MyView extends DishListView {
                                         <td><?php echo $product-> isVolumeWeightLiquid() ? 'мл' : 'грам'; ?></td>
                                         <td>
                                             <?php if ($this->checkRight('product', 'edit')) : ?>
-                                                <a href='forms/edit-product.php?dish=<?php echo $_GET['dish']; ?>&file=<?php echo
-                                                        $product->getId(); ?>'>Редагувати</a>
+                                                <a href='?action=edit-product-form&dish=<?php echo $_GET['dish']; ?>&file=<?php echo
+                                                        $product -> getId(); ?>'>Редагувати</a>
                                             <?php endif; ?>
                                             <?php if ($this->checkRight('product', 'delete')) : ?>
-                                                <a href='forms/delete-product.php?dish=<?php echo $_GET['dish']; ?>&file=<?php echo
-                                                         $product->getId(); ?>'>Видалити</a>
+                                                <a href='?action=delete-product&dish=<?php echo $_GET['dish']; ?>&file=<?php echo
+                                                         $product -> getId(); ?>'>Видалити</a>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -97,7 +97,7 @@ class MyView extends DishListView {
             <?php endif; ?>
             <form name="product-filter" method="post">
                 <div class="btn-group">
-                    <input type="text" name="productProdFilter" value="<?php echo $_POST['productProdFilter'] ?>">
+                    <input type="text" name="productProdFilter" value="<?php echo $_POST['productProdFilter']; ?>">
                     Фільтрування по назві продукту <br>
                     <input type="submit" value="Фільтрування" class="button">
                 </div>
@@ -110,8 +110,8 @@ class MyView extends DishListView {
         <!DOCTYPE html>
         <html lang="en">
         <head>
-            <title>Dish-List</title>
-            <link rel="stylesheet" type="text/css" href="css/main-style.css">
+            <title>Список страв</title>
+            <link rel="stylesheet" href="css/main-style.css">
             <link rel="stylesheet" href="css/liquid-style.css">
             <link rel="stylesheet" href="css/dish-choose-style.css">
         </head>
@@ -120,9 +120,9 @@ class MyView extends DishListView {
                 <div class="user-info">
                     <span>Hello <?php echo $_SESSION['user']; ?>!</span>
                     <?php if ($this -> checkRight('user', 'admin')) : ?>
-                        <a href="admin/index.php">Адміністрування</a>
+                        <a href="?action=admin">Адміністрування</a>
                     <?php endif; ?>
-                    <a href="auth/logout.php">Logout</a>
+                    <a href="?action=logout">Logout</a>
                 </div>
             <?php
             if($this -> checkRight('dish', 'view')) {
@@ -134,11 +134,11 @@ class MyView extends DishListView {
 
 
             ?>
-        </header>
+            </header>
         <?php
-        if($this -> checkRight('product', 'view')) {
-            $this -> showProducts($products);
-        }
+            if($this -> checkRight('product', 'view')) {
+                $this -> showProducts($products);
+            }
         ?>
         </body>
         </html>
@@ -150,12 +150,12 @@ class MyView extends DishListView {
         <!DOCTYPE html>
         <html lang="en">
         <head>
-            <link rel="stylesheet" type="text/css" href="../css/edit-dish-style.css">
+            <link rel="stylesheet" type="text/css" href="css/edit-dish-style.css">
             <title>Редагування інформації</title>
         </head>
         <body>
-            <a href="../index.php?dish=<?php echo $_GET['dish']; ?>"> На головну</a>
-            <form name='edit-dish' method="post">
+            <a href="index.php?dish=<?php echo $_GET['dish']; ?>"> На головну</a>
+            <form name='edit-dish' method="post" action="?action=edit-dish&dish=<?php echo $_GET['dish']; ?>">
                 <div>
                     <label for="nameOfTheDish">Назва страви: </label>
                     <input type="text" name="nameOfTheDish" pattern="^[а-яА-ЯіІїЇєЄёЁa-zA-Z]+([\s-][а-яА-ЯіІїЇєЄёЁa-zA-Z]+)*$" 
@@ -187,13 +187,13 @@ class MyView extends DishListView {
         <!DOCTYPE html>
         <html lang="en">
         <head>
-            <link rel="stylesheet" href="../css/edit-prod-style.css">
+            <link rel="stylesheet" href="css/edit-prod-style.css">
             <title>Редагування продукту</title>
         </head>
         <body>
             <?php
             ?>
-            <form name="edit-product" method="post">
+            <form name="edit-product" method="post" action="?action=edit-product&file=<?php echo $_GET['file'];?>&dish=<?php echo $_GET['dish'];?>">
                 <div>
                     <label class="text-field__label" for="products_name">Продукт: </label>
                     <input class="text-field__input" type="text" name="products_name" pattern="^[а-яА-ЯіІїЇєЄёЁa-zA-Z]+([\s-][а-яА-ЯіІїЇєЄёЁa-zA-Z]+)*$" 
@@ -220,7 +220,7 @@ class MyView extends DishListView {
                 <br>  
                 <div class="btn-group">
                     <input class="button" type="submit" name="ok" value="Змінити"> 
-                    <input class="button" type="submit" formaction="../index.php" name="ok" value="На головну"> 
+                    <input class="button" type="submit" formaction="index.php?dish=<?php echo $_GET['dish']; ?>" name="ok" value="На головну"> 
                 </div>
             </form>
         </body>
@@ -233,11 +233,11 @@ class MyView extends DishListView {
         <!DOCTYPE html>
         <html lang="en">
         <head>
-            <link rel="stylesheet" href="../css/edit-prod-style.css">
+            <link rel="stylesheet" href="css/edit-prod-style.css">
             <title>Create product</title>
         </head>
         <body>
-            <form name="create-product" method="post">
+            <form name="create-product" method="post" action="?action=create-product&dish=<?php echo $_GET['dish']; ?>">
                 <div class="text-field">
                     <div>
                         <label class="text-field__label" for="products_name">Продукт: </label>
@@ -262,7 +262,7 @@ class MyView extends DishListView {
                 </div>  <br>
                 <div class="btn-group">
                     <input class="button" type="submit" name="ok" value="Додати">
-                    <input class="button" type="submit" formaction="../index.php" name="ok" value="На головну">
+                    <input class="button" type="submit" formaction="?dish=<?php echo $_GET['dish']; ?>" name="ok" value="На головну">
                 </div>
             </form>
         </body>
@@ -275,11 +275,11 @@ class MyView extends DishListView {
         <!DOCTYPE html>
     <html lang="en">
     <head>
-        <link rel="stylesheet" href="../css/login-style.css">
+        <link rel="stylesheet" href="css/login-style.css">
         <title>Authentication</title>
     </head>
     <body>
-        <form method="post">
+        <form method="post" action="?action=checkLogin">
             <p>
                 <input type="text" name="username" placeholder="username">
             </p>
@@ -304,9 +304,9 @@ class MyView extends DishListView {
         </head>
         <body>
             <header>
-                <a href="../index.php">На головну</a>
+                <a href="index.php">На головну</a>
                 <h1>Адміністрування користувачів</h1>
-                <link rel="stylesheet" type="text/css" href="../css/main-style.css">
+                <link rel="stylesheet" type="text/css" href="css/main-style.css">
             </header>
             <section>
                 <table>
@@ -320,7 +320,7 @@ class MyView extends DishListView {
                             <?php if($user ->getUserName() !=$_SESSION['user'] && $user -> getUserName() 
                                 != 'admin' && trim($user -> getUserName()) != ''): ?>
                             <tr>
-                                <td><a href="edit-user.php?username=<?php echo $user -> getUserName(); ?>"><?php echo $user -> getUserName(); ?></a></td>
+                                <td><a href="?action=edit-user-form&username=<?php echo $user -> getUserName(); ?>"><?php echo $user -> getUserName(); ?></a></td>
                             </tr>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -338,12 +338,12 @@ class MyView extends DishListView {
         <html lang="en">
         <head>
             <title>Редагування користувача</title>
-            <link rel="stylesheet" type="text/css" href="admin.css">
+            <link rel="stylesheet" type="text/css" href="css/admin.css">
         </head>
         <body>
             <header>
-                <a href="index.php">До списку користувачів</a>
-                <form name="edit-user" method="POST">
+                <a href="?action=admin">До списку користувачів</a>
+                <form name="edit-user" method="post" action="?action=edit-user&user=<?php echo $_GET['user']; ?>">
                     <div class="tbl">
                         <div>
                             <label for="user_name">Username: </label>
