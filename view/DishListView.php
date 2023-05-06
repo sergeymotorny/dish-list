@@ -4,6 +4,7 @@ namespace View;
 
 abstract class DishListView {
     const SIMPLEVIEW = 0;
+    const BOOTSTRAPVIEW = 1;
     private $user;
 
     public function setCurrentUser(\Model\User $user) {
@@ -24,6 +25,8 @@ abstract class DishListView {
     public static function makeView($type) {
         if($type == self::SIMPLEVIEW) {
             return new MyView();
+        } elseif ($type == self::BOOTSTRAPVIEW) {
+            return new BootstrapView();
         }
         return new MyView();
     }

@@ -1,0 +1,15 @@
+div.dish-list, div.user-info, div.dish-control, div.table-products {
+    margin-top: 20px;
+}
+section.products {
+    margin-top: 40px;
+}
+div.user-info a, div.dish-control a {
+    margin-left: 10px;
+}
+div.table-products table th {
+    text-align: center;
+}
+div.add-prod {
+    margin-bottom: 10px;
+}
